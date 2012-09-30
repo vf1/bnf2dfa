@@ -1,0 +1,103 @@
+﻿
+//
+// -------------------------------------------------------------------------------[ .METHOD
+//
+.METHOD.OPTIONS -> Const = ?Method;
+.METHOD.GET -> Const = ?Method;
+.METHOD.HEAD -> Const = ?Method;
+.METHOD.POST -> Const = ?Method;
+.METHOD.PUT -> Const = ?Method;
+.METHOD.DELETE -> Const = ?Method;
+.METHOD.TRACE -> Const = ?Method;
+.METHOD.CONNECT -> Const = ?Method;
+.METHOD.extension-method -> Const = ?Method, Extension, 20;
+
+//
+// -------------------------------------------------------------------------------[ .PRODUCT
+//
+.PRODUCT -> LookupRange = ?<Product>.Value;
+.PRODUCT.token -> LookupRange = ?<Product>.Name;
+.PRODUCT.product-version.token -> LookupRange = ?<Product>.Version;
+
+//
+// -------------------------------------------------------------------------------[ Request-Line
+//
+req.Request-Line.Method -> Group = , METHOD;
+req.Request-Line.Request-URI -> LookupRange = RequestUri;
+req.Request-Line.HTTP-Version.DIGIT -> Decimal = HttpVersion;
+
+//
+// -------------------------------------------------------------------------------[ Host
+//
+req.request-header.Host.host -> LookupRange = Host.Host;
+req.request-header.Host.port.DIGIT -> Decimal = Host.Port;
+
+//
+// -------------------------------------------------------------------------------[ Content-Type
+//
+req.entity-header.Content-Type.media-type.type -> LookupRange = ContentType.Type;
+req.entity-header.Content-Type.media-type.subtype -> LookupRange = ContentType.Subtype;
+req.entity-header.Content-Type.media-type -> LookupRange = ContentType.Value;
+
+//
+// -------------------------------------------------------------------------------[ Content-Length
+//
+req.entity-header.Content-Length.DIGIT -> Decimal = ContentLength;
+
+//
+// -------------------------------------------------------------------------------[ Referer
+//
+req.request-header.Referer.absoluteURI -> LookupRange = Referer;
+req.request-header.Referer.relativeURI -> LookupRange = Referer;
+
+//
+// -------------------------------------------------------------------------------[ Upgrade
+//
+req.general-header.Upgrade.websocket -> Const = Upgrade[Upgrade];
+req.general-header.Upgrade.product.token -> Const = Upgrade[Upgrade], Other, 20;
+req.general-header.Upgrade.HCOLON.: -> Count = Upgrade, 8, -1;
+req.general-header.Upgrade.COMMA., -> Count = Upgrade, 8, -1;
+
+//
+// -------------------------------------------------------------------------------[ Sec-WebSocket-Key
+//
+req.request-header.Sec-WebSocket-Key.base64-value-non-empty -> LookupRange = SecWebSocketKey;
+
+//
+// -------------------------------------------------------------------------------[ Sec-WebSocket-Extensions
+//
+req.request-header.Sec-WebSocket-Extensions.extension-list.extension.extension-token -> LookupRange = SecWebSocketExtensions[SecWebSocketExtensions];
+req.request-header.Sec-WebSocket-Extensions.HCOLON.: -> Count = SecWebSocketExtensions, 8, -1;
+req.request-header.Sec-WebSocket-Extensions.extension-list.COMMA., -> Count = SecWebSocketExtensions, 8, -1;
+
+//
+// -------------------------------------------------------------------------------[ Sec-WebSocket-Protocol-Client
+//
+req.request-header.Sec-WebSocket-Protocol-Client.token -> LookupRange = SecWebSocketProtocol[SecWebSocketProtocol];
+req.request-header.Sec-WebSocket-Protocol-Client.HCOLON.: -> Count = SecWebSocketProtocol, 8, -1;
+req.request-header.Sec-WebSocket-Protocol-Client.COMMA., -> Count = SecWebSocketProtocol, 8, -1;
+
+//
+// -------------------------------------------------------------------------------[ Sec-WebSocket-Version-Client
+//
+req.request-header.Sec-WebSocket-Version-Client.version -> Decimal = SecWebSocketVersion;
+
+//
+// -------------------------------------------------------------------------------[ Cookie
+//
+req.cookie-header.cookie-string.cookie-pair.cookie-name -> LookupRange = Cookie[Cookie].Name;
+req.cookie-header.cookie-string.cookie-pair.cookie-value.cookie-octet -> LookupRange = Cookie[Cookie].Value;
+req.cookie-header.HCOLON.: -> Count = Cookie, 8, -1;
+req.cookie-header.cookie-string.; -> Count = Cookie, 8, -1;
+
+//
+//
+//
+//////////////////////////////////////////////////////////////////////////////////[...............]
+// DRAFTS
+//req.general-header.Upgrade.product -> Group = Upgrades[UpgradeCount], PRODUCT;
+//
+//req.general-header.Upgrade.websocket -> Const = Upgrades[UpgradeCount].Upgrate;
+//req.general-header.Upgrade.product.token -> Const = Upgrades[UpgradeCount].Upgrate, Other, 20; LookupRange = Upgrades[UpgradeCount].Name;
+//req.general-header.Upgrade.product -> LookupRange = Upgrades[UpgradeCount].Value;
+//req.general-header.Upgrade.product.product-version.token -> LookupRange = Upgrades[UpgradeCount].Version;

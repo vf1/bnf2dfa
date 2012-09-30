@@ -1,0 +1,910 @@
+﻿;@mode "http-comaptible"
+
+;************************************************************************************************
+; RFC 2616 
+; http://www.ietf.org/rfc/rfc2616.txt 
+
+OCTET          =  %x00-0FF
+                          ; <any 8-bit sequence of data> 
+
+CHAR           =  %x00-7F
+                          ; <any US-ASCII character (octets 0 - 127)> 
+
+UPALPHA        =  %x41-5A
+                          ; <any US-ASCII uppercase letter "A".."Z"> 
+LOALPHA        =  %x61-7A
+                          ; <any US-ASCII lowercase letter "a".."z"> 
+
+ALPHA          = UPALPHA | LOALPHA
+
+DIGIT          =  %x30-39
+                          ; <any US-ASCII digit "0".."9"> 
+
+CTL            =  %x00-1F | %x7F
+                          ; <any US-ASCII control character
+                          ;  (octets 0 - 31) and DEL (127)> 
+
+CR             =  %x0D
+                          ; <US-ASCII CR, carriage return (13)> 
+
+LF             =  %x0A
+                          ; <US-ASCII LF, linefeed (10)> 
+
+SP             =  %x20
+                          ; <US-ASCII SP, space (32)> 
+
+HT             =  %x09
+                          ; <US-ASCII HT, horizontal-tab (9)> 
+
+DQUOTE         =  %x22
+                          ; <US-ASCII double-quote mark (34)> 
+
+CRLF           = CR LF
+
+LWS            = [CRLF] 1*( SP | HT )
+
+TEXT           = %x20-7E | %x80-0FF | LWS
+                          ; <any OCTET except CTLs,
+                          ;   but including LWS> 
+
+
+HEX            = "A" | "B" | "C" | "D" | "E" | "F"
+               | "a" | "b" | "c" | "d" | "e" | "f" | DIGIT
+
+token       =  1*(alphanum | "-" | "." | "!" | "%" | "*"
+               | "_" | "+" | "`" | "'" | "~" )
+               ; 1*<any CHAR except CTLs or separators> 
+
+separators     = "(" | ")" | "<" | ">" | "@"
+               | "," | ";" | ":" | "\" | DQUOTE
+               | "/" | "[" | "]" | "?" | "="
+               | "{" | "}" | SP | HT
+                      
+comment        = "(" *( ctext ) ")" ; vf: remove comment from () 
+
+ctext    =  %x21-27 | %x2A-5B | %x5D-7E | UTF8-NONASCII | LWS
+            ; <any TEXT excluding "(" and ")"> 
+
+quoted-string  = ( DQUOTE *(qdtext | quoted-pair) DQUOTE )
+
+qdtext         =  LWS | %x21 | %x23-5B | %x5D-7E
+                  | UTF8-NONASCII
+                 ; <any TEXT except DQUOTE> 
+
+quoted-pair    = "\" CHAR
+
+HTTP-Version   = "HTTP" "/" 1*DIGIT "." 1*DIGIT
+
+URI            = ( absoluteURI | relativeURI ) [ "#" fragment ]
+
+absoluteURI    = scheme ":" *( uchar | reserved )
+
+relativeURI    = net_path | abs_path | rel_path
+
+net_path       = "//" net_loc [ abs_path ]
+
+abs_path       = "/" rel_path
+
+rel_path       = [ path ] [ ";" params ] [ "?" query ]
+
+path           = fsegment *( "/" segment )
+
+fsegment       = 1*pchar
+
+segment        = *pchar
+
+params         = param *( ";" param )
+
+param          = *( pchar | "/" )
+
+scheme         = 1*( ALPHA | DIGIT | "+" | "-" | "." )
+
+net_loc        = *( pchar | ";" | "?" )
+
+query          = *( uchar | reserved )
+
+fragment       = *( uchar | reserved )
+
+pchar          = uchar | ":" | "@" | "&" | "=" | "+"
+
+uchar          = unreserved | escape
+
+unreserved     = ALPHA | DIGIT | safe | extra | national
+
+escape         = "%" HEX HEX
+
+reserved       = ";" | "/" | "?" | ":" | "@" | "&" | "=" | "+"
+
+extra          = "!" | "*" | "'" | "(" | ")" | ","
+
+safe           = "$" | "-" | "_" | "."
+
+unsafe         = CTL | SP | DQUOTE | "#" | "%" | "<" | ">"
+
+national       = %x80-0FF
+                 ; <any OCTET excluding ALPHA, DIGIT,
+                 ;   reserved, extra, safe, and unsafe> 
+
+http_URL       = "http:" "//" host [ ":" port ] [ abs_path [ "?" query ]]
+
+;
+;host           = <A legal Internet host domain name
+;                or IP address (in dotted-decimal form),
+;                as defined by Section 2.1 of RFC 1123>
+                
+port           = *DIGIT
+
+HTTP-date    = rfc1123-date | rfc850-date | asctime-date
+
+rfc1123-date = wkday "," SP date1 SP time SP "GMT"
+
+rfc850-date  = weekday "," SP date2 SP time SP "GMT"
+
+asctime-date = wkday SP date3 SP time SP 4 DIGIT
+
+date1        = 2 DIGIT SP month SP 4 DIGIT
+             ; day month year (e.g., 02 Jun 1982) 
+
+date2        = 2 DIGIT "-" month "-" 2 DIGIT
+             ; day-month-year (e.g., 02-Jun-82) 
+
+date3        = month SP ( 2 DIGIT | ( SP 1 DIGIT ))
+             ; month day (e.g., Jun  2) 
+
+time         = 2 DIGIT ":" 2 DIGIT ":" 2 DIGIT
+             ; 00:00:00 - 23:59:59 
+
+wkday        = "Mon" | "Tue" | "Wed"
+             | "Thu" | "Fri" | "Sat" | "Sun"
+
+weekday      = "Monday" | "Tuesday" | "Wednesday"
+             | "Thursday" | "Friday" | "Saturday" | "Sunday"
+
+month        = "Jan" | "Feb" | "Mar" | "Apr"
+             | "May" | "Jun" | "Jul" | "Aug"
+             | "Sep" | "Oct" | "Nov" | "Dec"
+
+delta-seconds  = 1*DIGIT
+
+charset = token
+
+content-coding   = token
+
+
+transfer-coding         = "chunked" | transfer-extension
+transfer-extension      = token *( ";" parameter )
+
+
+parameter      = attribute "=" value
+attribute      = token
+value          = token | quoted-string
+
+
+Chunked-Body   = *chunk
+                 last-chunk
+                 trailer
+                 CRLF
+
+chunk          = chunk-size [ chunk-extension ] CRLF
+                 chunk-data CRLF
+chunk-size     = 1*HEX
+last-chunk     = 1*("0") [ chunk-extension ] CRLF
+
+chunk-extension= *( ";" chunk-ext-name [ "=" chunk-ext-val ] )
+chunk-ext-name = token
+chunk-ext-val  = token | quoted-string
+chunk-data     = chunk-size(OCTET)
+trailer        = *(entity-header CRLF)
+       
+
+media-type     = type "/" subtype *( ";" parameter )
+type           = token
+subtype        = token
+
+
+product         = token ["/" product-version]
+product-version = token
+
+
+qvalue         = ( "0" [ "." 0*3 DIGIT ] )
+               | ( "1" [ "." 0*3("0") ] )
+
+
+language-tag  = primary-tag *( "-" subtag )
+primary-tag   = 1*8 ALPHA
+subtag        = 1*8 ALPHA
+
+
+entity-tag = [ weak ] opaque-tag
+weak       = "W/"
+opaque-tag = quoted-string
+
+
+range-unit       = bytes-unit | other-range-unit
+bytes-unit       = "bytes"
+other-range-unit = token
+
+
+HTTP-message   = Request | Response     ; HTTP/1.1 messages 
+
+
+generic-message = start-line
+                  *(message-header CRLF)
+                  CRLF
+                  [ message-body ]
+start-line      = Request-Line | Status-Line
+
+
+message-header = field-name HCOLON [ field-value ]
+field-name     = token
+field-value    = *( field-content | LWS )
+field-content  = *TEXT
+               ; vf: DRAFT 
+               ; <the OCTETs making up the field-value
+               ;  and consisting of either *TEXT or combinations
+               ;  of token, tspecials, and quoted-string> 
+
+
+message-body   = entity-body
+               ; | <entity-body encoded as per Transfer-Encoding> 
+
+general-header = Cache-Control            ; Section 14.9 
+               | Connection               ; Section 14.10 
+               | Date                     ; Section 14.18 
+               | Pragma                   ; Section 14.32 
+               | Trailer                  ; Section 14.40 
+               | Transfer-Encoding        ; Section 14.41 
+               | Upgrade                  ; Section 14.42 
+               | Via                      ; Section 14.45 
+               | Warning                 ; Section 14.46 
+                      
+
+Request       = Request-Line              ; Section 5.1 
+                *(( general-header        ; Section 4.5 
+                 | request-header         ; Section 5.3 
+                 | entity-header ) CRLF)  ; Section 7.1 
+                CRLF
+                [ message-body ]         ; Section 4.3 
+
+
+Request-Line   = Method SP Request-URI SP HTTP-Version CRLF
+
+
+Method         = "OPTIONS"                ; Section 9.2 
+               | "GET"                    ; Section 9.3 
+               | "HEAD"                   ; Section 9.4 
+               | "POST"                   ; Section 9.5 
+               | "PUT"                    ; Section 9.6 
+               | "DELETE"                 ; Section 9.7 
+               | "TRACE"                  ; Section 9.8 
+               | "CONNECT"                ; Section 9.9 
+               | extension-method
+extension-method = token
+
+
+Request-URI    = "*" | absoluteURI | abs_path ; vf: NOT FOUND => | authority 
+
+
+request-header = Accept                   ; Section 14.1 
+               | Accept-Charset           ; Section 14.2 
+               | Accept-Encoding          ; Section 14.3 
+               | Accept-Language          ; Section 14.4 
+               | Authorization            ; Section 14.8 
+               | Expect                   ; Section 14.20 
+               | From                     ; Section 14.22 
+               | Host                     ; Section 14.23 
+               | If-Match                 ; Section 14.24 
+               | If-Modified-Since        ; Section 14.25 
+               | If-None-Match            ; Section 14.26 
+               | If-Range                 ; Section 14.27 
+               | If-Unmodified-Since      ; Section 14.28 
+               | Max-Forwards             ; Section 14.31 
+               | Proxy-Authorization      ; Section 14.34 
+               | Range                    ; Section 14.35 
+               | Referer                  ; Section 14.36 
+               | TE                       ; Section 14.39 
+               | User-Agent              ; Section 14.43 
+               
+
+Response      = Status-Line               ; Section 6.1 
+                *(( general-header        ; Section 4.5 
+                 | response-header        ; Section 6.2 
+                 | entity-header ) CRLF)  ; Section 7.1 
+                CRLF
+                [ message-body ]         ; Section 7.2 
+
+
+Status-Line = HTTP-Version SP Status-Code SP Reason-Phrase CRLF
+
+
+Status-Code    = "100"   ; Continue 
+               | "101"   ; Switching Protocols 
+               | "200"   ; OK 
+               | "201"   ; Created 
+               | "202"   ; Accepted 
+               | "203"   ; Non-Authoritative Information 
+               | "204"   ; No Content 
+               | "205"   ; Reset Content 
+               | "206"   ; Partial Content 
+               | "300"   ; Multiple Choices 
+               | "301"   ; Moved Permanently 
+               | "302"   ; Moved Temporarily 
+               | "303"   ; See Other 
+               | "304"   ; Not Modified 
+               | "305"   ; Use Proxy 
+               | "307"   ;  Section 10.3.8: Temporary Redirect 
+               | "400"   ; Bad Request 
+               | "401"   ; Unauthorized 
+               | "402"   ; Payment Required 
+               | "403"   ; Forbidden 
+               | "404"   ; Not Found 
+               | "405"   ; Method Not Allowed 
+               | "406"   ; Not Acceptable 
+               | "407"   ; Proxy Authentication Required 
+               | "408"   ; Request Time-out 
+               | "409"   ; Conflict 
+               | "410"   ; Gone 
+               | "411"   ; Length Required 
+               | "412"   ; Precondition Failed 
+               | "413"   ; Request Entity Too Large 
+               | "414"   ; Request-URI Too Large 
+               | "415"   ; Unsupported Media Type 
+               | "416"   ; Section 10.4.17: Requested range not satisfiable 
+               | "417"   ; Section 10.4.18: Expectation Failed 
+               | "500"   ; Internal Server Error 
+               | "501"   ; Not Implemented 
+               | "502"   ; Bad Gateway 
+               | "503"   ; Service Unavailable 
+               | "504"   ; Gateway Time-out 
+               | "505"   ; HTTP Version not supported 
+               | extension-code
+
+extension-code = 3 DIGIT
+Reason-Phrase  = *TEXT
+                   ; vf: DARFT 
+                   ; *<TEXT, excluding CR, LF> 
+
+
+response-header = Accept-Ranges           ; Section 14.5 
+                | Age                     ; Section 14.6 
+                | ETag                    ; Section 14.19 
+                | Location                ; Section 14.30 
+                | Proxy-Authenticate      ; Section 14.33 
+                | Retry-After             ; Section 14.37 
+                | Server                  ; Section 14.38 
+                | Vary                    ; Section 14.44 
+                | WWW-Authenticate       ; Section 14.47 
+                
+
+entity-header  = Allow                    ; Section 14.7 
+               | Content-Encoding         ; Section 14.11 
+               | Content-Language         ; Section 14.12 
+               | Content-Length           ; Section 14.13 
+               | Content-Location         ; Section 14.14 
+               | Content-MD5              ; Section 14.15 
+               | Content-Range            ; Section 14.16 
+               | Content-Type             ; Section 14.17 
+               | Expires                  ; Section 14.21 
+               | Last-Modified           ; Section 14.29 
+               ; | extension-header;   ; vf: this pass all invalid standart header 
+
+extension-header = message-header
+
+
+entity-body    = *OCTET
+
+
+Accept         = "Accept" HCOLON
+                 #( media-range [ accept-params ] )
+
+media-range    = ( "*/*"
+                 | ( type "/" "*" )
+                 | ( type "/" subtype )
+                 ) *( ";" parameter )
+accept-params  = ";" "q" "=" qvalue *( accept-extension )
+accept-extension = ";" token [ "=" ( token | quoted-string ) ]
+       
+
+Accept-Charset = "Accept-Charset" HCOLON
+        1#( ( charset | "*" )[ ";" "q" "=" qvalue ] )
+
+
+Accept-Encoding  = "Accept-Encoding" HCOLON
+                   1#( codings [ ";" "q" "=" qvalue ] )
+codings          = ( content-coding | "*" )
+
+
+Accept-Language = "Accept-Language" HCOLON
+                  1#( language-range [ ";" "q" "=" qvalue ] )
+language-range  = ( ( 1*8 ALPHA *( "-" 1*8 ALPHA ) ) | "*" )
+
+
+Accept-Ranges     = "Accept-Ranges" HCOLON acceptable-ranges
+acceptable-ranges = 1#range-unit | "none"
+
+Age = "Age" HCOLON age-value
+age-value = delta-seconds
+
+Allow   = "Allow" HCOLON #Method
+
+
+Authorization  = "Authorization" HCOLON credentials
+
+
+Cache-Control   = "Cache-Control" HCOLON 1#cache-directive
+
+cache-directive = cache-request-directive
+     | cache-response-directive
+
+cache-request-directive =
+       "no-cache"                          ; Section 14.9.1 
+     | "no-store"                          ; Section 14.9.2 
+     | "max-age" "=" delta-seconds         ; Section 14.9.3, 14.9.4 
+     | "max-stale" [ "=" delta-seconds ]   ; Section 14.9.3 
+     | "min-fresh" "=" delta-seconds       ; Section 14.9.3 
+     | "no-transform"                      ; Section 14.9.5 
+     | "only-if-cached"                    ; Section 14.9.4 
+     | cache-extension                    ; Section 14.9.6 
+
+cache-response-directive =
+       "public"                               ; Section 14.9.1 
+     | "private" [ "=" DQUOTE 1#field-name DQUOTE ] ; Section 14.9.1 
+     | "no-cache" [ "=" DQUOTE 1#field-name DQUOTE ]; Section 14.9.1 
+     | "no-store"                             ; Section 14.9.2 
+     | "no-transform"                         ; Section 14.9.5 
+     | "must-revalidate"                      ; Section 14.9.4 
+     | "proxy-revalidate"                     ; Section 14.9.4 
+     | "max-age" "=" delta-seconds            ; Section 14.9.3 
+     | "s-maxage" "=" delta-seconds           ; Section 14.9.3 
+     | cache-extension                       ; Section 14.9.6 
+
+cache-extension = token [ "=" ( token | quoted-string ) ]
+
+
+Connection = "Connection" HCOLON 1#(connection-token)
+connection-token  = token
+
+
+Content-Encoding  = "Content-Encoding" HCOLON 1#content-coding
+
+
+Content-Language  = "Content-Language" HCOLON 1#language-tag
+
+
+Content-Length    = "Content-Length" HCOLON 1*DIGIT
+
+
+Content-Location = "Content-Location" HCOLON
+                  ( absoluteURI | relativeURI )
+
+                         
+Content-MD5   = "Content-MD5" HCOLON md5-digest
+md5-digest    = base64-value-non-empty
+                ; <base64 of 128 bit MD5 digest as per RFC 1864> 
+
+
+Content-Range = "Content-Range" HCOLON content-range-spec
+
+content-range-spec      = byte-content-range-spec
+byte-content-range-spec = bytes-unit SP
+                          byte-range-resp-spec "/"
+                          ( instance-length | "*" )
+
+byte-range-resp-spec    = (first-byte-pos "-" last-byte-pos) | "*"
+instance-length         = 1*DIGIT
+
+
+Content-Type   = "Content-Type" HCOLON media-type
+
+
+Date  = "Date" HCOLON HTTP-date
+
+
+ETag = "ETag" HCOLON entity-tag
+
+
+
+Expect       =  "Expect" HCOLON 1#expectation
+
+expectation  =  "100-continue" | expectation-extension
+expectation-extension =  token [ "=" ( token | quoted-string )
+                         *expect-params ]
+expect-params =  ";" token [ "=" ( token | quoted-string ) ]
+
+
+Expires = "Expires" HCOLON HTTP-date
+
+
+From   = "From" HCOLON mailbox
+
+
+Host = "Host" HCOLON host [ ":" port ] ; Section 3.2.2 
+
+
+If-Match = "If-Match" HCOLON ( "*" | 1#entity-tag )
+
+
+If-Modified-Since = "If-Modified-Since" HCOLON HTTP-date
+
+
+If-None-Match = "If-None-Match" HCOLON ( "*" | 1#entity-tag )
+
+
+If-Range = "If-Range" HCOLON ( entity-tag | HTTP-date )
+
+
+If-Unmodified-Since = "If-Unmodified-Since" HCOLON HTTP-date
+
+
+Last-Modified  = "Last-Modified" HCOLON HTTP-date
+
+
+Location       = "Location" HCOLON absoluteURI
+
+
+Max-Forwards   = "Max-Forwards" HCOLON 1*DIGIT
+
+
+Pragma            = "Pragma" HCOLON 1#pragma-directive
+pragma-directive  = "no-cache" | extension-pragma
+extension-pragma  = token [ "=" ( token | quoted-string ) ]
+
+
+Proxy-Authenticate  = "Proxy-Authenticate" HCOLON 1#challenge
+
+
+Proxy-Authorization     = "Proxy-Authorization" HCOLON credentials
+
+
+ranges-specifier = byte-ranges-specifier
+byte-ranges-specifier = bytes-unit "=" byte-range-set
+byte-range-set  = 1#( byte-range-spec | suffix-byte-range-spec )
+byte-range-spec = first-byte-pos "-" [last-byte-pos]
+first-byte-pos  = 1*DIGIT
+last-byte-pos   = 1*DIGIT
+
+suffix-byte-range-spec = "-" suffix-length
+suffix-length = 1*DIGIT
+
+
+Range = "Range" HCOLON ranges-specifier
+
+
+Referer        = "Referer" HCOLON ( absoluteURI | relativeURI )
+
+
+Retry-After  = "Retry-After" HCOLON ( HTTP-date | delta-seconds )
+
+
+Server         = "Server" HCOLON 1*( product | comment )
+
+
+TE        = "TE" HCOLON #( t-codings )
+t-codings = "trailers" | ( transfer-extension [ accept-params ] )
+
+
+Trailer  = "Trailer" HCOLON 1#field-name
+
+
+Transfer-Encoding       = "Transfer-Encoding" HCOLON 1#transfer-coding
+
+
+; vf: original -> Upgrade        = "Upgrade" HCOLON 1#product; 
+Upgrade        = "Upgrade" HCOLON 1#(product | "websocket" ["/" product-version])
+
+
+User-Agent     = "User-Agent" HCOLON 1*( product | comment )
+
+
+Vary  = "Vary" HCOLON ( "*" | 1#field-name )
+
+
+Via =  "Via" HCOLON 1#( received-protocol received-by [ comment ] )
+received-protocol = [ protocol-name "/" ] protocol-version
+protocol-name     = token
+protocol-version  = token
+received-by       = ( host [ ":" port ] ) | pseudonym
+pseudonym         = token
+
+
+Warning    = "Warning" HCOLON 1#warning-value
+
+warning-value = warn-code SP warn-agent SP warn-text [SP warn-date]
+
+warn-code  = 3 DIGIT
+warn-agent = ( host [ ":" port ] ) | pseudonym
+                ; the name or pseudonym of the server adding 
+                ; the Warning header, for use in debugging 
+warn-text  = quoted-string
+warn-date  = DQUOTE HTTP-date DQUOTE
+
+
+WWW-Authenticate  = "WWW-Authenticate" HCOLON 1#challenge
+
+
+;************************************************************************************************
+; RFC 2617 
+
+auth-scheme    = token
+auth-param     = token "=" ( token | quoted-string )
+
+
+realm       = "realm" "=" realm-value
+realm-value = quoted-string
+
+
+credentials = auth-scheme #auth-param
+
+
+challenge   = "Basic" realm
+credentials = "Basic" basic-credentials
+
+
+basic-credentials = base64-user-pass
+base64-user-pass  = base64-value-non-empty
+                    ; <base64 [4] encoding of user-pass,
+                    ;   except not limited to 76 char/line> 
+user-pass   = userid ":" password
+userid      = *(%x20-39 | %x3B-7E | %x80-0FF | LWS)
+                ; *<TEXT excluding ":"> 
+password    = *TEXT
+
+
+
+challenge        =  "Digest" digest-challenge
+
+digest-challenge  = 1#( realm | [ domain ] | nonce |
+                    [ opaque ] |[ stale ] | [ algorithm ] |
+                    [ qop-options ] | [auth-param] )
+
+domain            = "domain" "=" DQUOTE URI ( 1*SP URI ) DQUOTE
+URI               = absoluteURI | abs_path
+nonce             = "nonce" "=" nonce-value
+nonce-value       = quoted-string
+opaque            = "opaque" "=" quoted-string
+stale             = "stale" "=" ( "true" | "false" )
+algorithm         = "algorithm" "=" ( "MD5" | "MD5-sess" | token )
+qop-options       = "qop" "=" DQUOTE 1#qop-value DQUOTE
+qop-value         = "auth" | "auth-int" | token
+
+
+
+credentials      = "Digest" digest-response
+digest-response  = 1#( username | realm | nonce | digest-uri
+                | response | [ algorithm ] | [cnonce] |
+                [opaque] | [message-qop] |
+                [nonce-count]  | [auth-param] )
+
+username         = "username" "=" username-value
+username-value   = quoted-string
+digest-uri       = "uri" "=" digest-uri-value
+digest-uri-value = Request-URI   ; As specified by HTTP/1.1 
+message-qop      = "qop" "=" qop-value
+cnonce           = "cnonce" "=" cnonce-value
+cnonce-value     = nonce-value
+nonce-count      = "nc" "=" nc-value
+nc-value         = 8 LHEX
+response         = "response" "=" request-digest
+request-digest = DQUOTE 32 LHEX DQUOTE
+LHEX             =  "0" | "1" | "2" | "3" |
+                    "4" | "5" | "6" | "7" |
+                    "8" | "9" | "a" | "b" |
+                    "c" | "d" | "e" | "f"
+
+
+AuthenticationInfo = "Authentication-Info" HCOLON auth-info
+auth-info          = 1#(nextnonce | [ message-qop ]
+                       | [ response-auth ] | [ cnonce ]
+                       | [nonce-count] )
+nextnonce          = "nextnonce" "=" nonce-value
+response-auth      = "rspauth" "=" response-digest
+response-digest    = DQUOTE *LHEX DQUOTE
+
+;************************************************************************************************
+; RFC 6265 
+
+set-cookie-header = "Set-Cookie:" SP set-cookie-string
+set-cookie-string = cookie-pair *( ";" SP cookie-av )
+cookie-pair       = cookie-name "=" cookie-value
+cookie-name       = token
+cookie-value      = *cookie-octet | ( DQUOTE *cookie-octet DQUOTE )
+cookie-octet      = %x21 | %x23-2B | %x2D-3A | %x3C-5B | %x5D-7E
+                    ; US-ASCII characters excluding CTLs,
+                    ;  whitespace DQUOTE, comma, semicolon,
+                    ;  and backslash 
+
+cookie-av         = expires-av | max-age-av | domain-av | path-av | secure-av | httponly-av | extension-av
+expires-av        = "Expires=" sane-cookie-date
+sane-cookie-date  = rfc1123-date
+max-age-av        = "Max-Age=" non-zero-digit *DIGIT
+                    ; In practice, both expires-av and max-age-av
+                    ;  are limited to dates representable by the
+                    ;  user agent. 
+non-zero-digit    = %x31-39
+                    ; digits 1 through 9 
+domain-av         = "Domain=" domain-value
+domain-value      = token &! ";" ; <subdomain> 
+                    ; defined in [RFC1034], Section 3.5, as
+                    ;  enhanced by [RFC1123], Section 2.1 
+path-av           = "Path=" path-value
+path-value        = except-CTL-semi ; <any CHAR except CTLs or ";"> 
+secure-av         = "Secure"
+httponly-av       = "HttpOnly"
+extension-av      = except-CTL-semi ; <any CHAR except CTLs or ";"> 
+except-CTL-semi   = (%x00-0FF) &! (CTL | ";")
+
+cookie-header     = "Cookie" HCOLON cookie-string
+cookie-string     = cookie-pair *( ";" SP cookie-pair )
+
+;************************************************************************************************
+; FROM RFC 6455 
+
+Sec-WebSocket-Key = "Sec-WebSocket-Key" HCOLON base64-value-non-empty
+Sec-WebSocket-Extensions = "Sec-WebSocket-Extensions" HCOLON extension-list
+Sec-WebSocket-Protocol-Client = "Sec-WebSocket-Protocol" HCOLON 1#token
+Sec-WebSocket-Version-Client = "Sec-WebSocket-Version" HCOLON version
+
+base64-value-non-empty = (1*base64-data [ base64-padding ]) | base64-padding
+base64-data      = 4*4 base64-character
+base64-padding   = (2*2 base64-character "==") | (3*3 base64-character "=")
+base64-character = ALPHA | DIGIT | "+" | "/"
+extension-list = 1#extension
+extension = extension-token *( ";" extension-param )
+extension-token = registered-token
+registered-token = token
+
+extension-param = token [ "=" (token | quoted-string) ]
+           ; When using the quoted-string syntax variant, the value
+           ;  after quoted-string unescaping MUST conform to the
+           ;  'token' ABNF. 
+NZDIGIT       =  "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+version = DIGIT | (NZDIGIT DIGIT) | ("1" DIGIT DIGIT) | ("2" DIGIT DIGIT)
+           ; Limited to 0-255 range, with no leading zeros 
+
+Sec-WebSocket-Accept     = "Sec-WebSocket-Accept" HCOLON base64-value-non-empty
+Sec-WebSocket-Protocol-Server = "Sec-WebSocket-Protocol" HCOLON token
+Sec-WebSocket-Version-Server = "Sec-WebSocket-Version" HCOLON 1#version
+
+request-header =| Sec-WebSocket-Key
+                | Sec-WebSocket-Extensions
+                | Sec-WebSocket-Protocol-Client
+                | Sec-WebSocket-Version-Client
+
+;************************************************************************************************
+; FROM RFC 1123 
+
+mailbox =  addr-spec            ; simple address 
+        | [phrase] route-addr  ; name & addr-spec 
+
+; for mailbox not from 1123 
+addr-spec  = absoluteURI
+route-addr = "<" [route] addr-spec ">"
+route      = 1#("@" hostname) ":" ; path-relative 
+phrase     = *TEXT
+
+;************************************************************************************************
+; BASIC RULES 
+
+alphanum  =  ALPHA | DIGIT
+
+DIGIT          =  %x30-39
+                          ; 0-9 
+
+TEXT-UTF8-TRIM  =  1*TEXT-UTF8char *(*LWS TEXT-UTF8char)
+TEXT-UTF8char   =  %x21-7E | UTF8-NONASCII
+UTF8-NONASCII   =  %xC0-0DF 1 UTF8-CONT
+                |  %xE0-0EF 2 UTF8-CONT
+                |  %xF0-0F7 3 UTF8-CONT
+                |  %xF8-0FB 4 UTF8-CONT
+                |  %xFC-0FD 5 UTF8-CONT
+
+UTF8-CONT       =  %x80-0BF
+
+LHEX  =  DIGIT | %x61-66 ; lowercase a-f 
+
+SWS  =  [LWS] ; sep whitespace 
+
+STAR    =  SWS "*" SWS ; asterisk 
+SLASH   =  SWS "/" SWS ; slash 
+EQUAL   =  SWS "=" SWS ; equal 
+LPAREN  =  SWS "(" SWS ; left parenthesis 
+RPAREN  =  SWS ")" SWS ; right parenthesis 
+RAQUOT  =  ">" SWS ; right angle quote 
+LAQUOT  =  SWS "<" ; left angle quote 
+COMMA   =  SWS "," SWS ; comma 
+SEMI    =  SWS ";" SWS ; semicolon 
+COLON   =  SWS ":" SWS ; colon 
+LDQUOT  =  SWS DQUOTE ; open double quotation mark 
+RDQUOT  =  DQUOTE SWS ; close double quotation mark 
+
+HEXDIG         =  DIGIT | "A" | "B" | "C" | "D" | "E" | "F"
+
+HTAB    =  %x09
+HCOLON  =  *( SP | HTAB ) ":" SWS
+
+;************************************************************************************************
+; FROM RFC 3261 
+
+host             =  hostname | IPv4address | IPv6reference
+hostname         =  *( domainlabel "." ) toplabel [ "." ]
+domainlabel      =  alphanum
+                    | alphanum *( alphanum | "-" ) alphanum
+toplabel         =  ALPHA | ALPHA *( alphanum | "-" ) alphanum
+
+IPv4address    =  1*3 DIGIT "." 1*3 DIGIT "." 1*3 DIGIT "." 1*3 DIGIT
+IPv6reference  =  "[" IPv6address "]"
+IPv6address    =  hexpart [ ":" IPv4address ]
+hexpart        =  hexseq | hexseq "::" [ hexseq ] | "::" [ hexseq ]
+hexseq         =  hex4 *( ":" hex4)
+hex4           =  1*4 HEXDIG
+port           =  1*DIGIT
+
+;************************************************************************************************
+; customization 
+
+req  =  Request-Line
+        *(( general-header
+          | request-header
+          | entity-header
+          | cookie-header
+          | extension-header-marked-only ) CRLF)
+        CRLF
+
+extension-header-marked-only = (token &! ( "Host"
+                                         | "Cookie"
+                                         | "Content-Type"
+                                         | "Content-Length"
+                                         | "Upgrade"
+                                         ; | "Referer" IE send buggy header with # 
+                                         | "Sec-WebSocket-Key"
+                                         | "Sec-WebSocket-Extensions"
+                                         | "Sec-WebSocket-Protocol"
+                                         | "Sec-WebSocket-Version" )) HCOLON [ field-value ]
+
+
+extension-header-for-request = (token &! (general-header-names 
+                                         | request-header-names 
+                                         | entity-header-names)) HCOLON [ field-value ]
+
+general-header-names = "Cache-Control"
+                     | "Connection"
+                     | "Date"
+                     | "Pragma"
+                     | "Trailer"
+                     | "Transfer-Encoding"
+                     | "Upgrade"
+                     | "Via"
+                     | "Warning"
+
+request-header-names = "Accept"
+                     | "Accept-Charset"
+                     | "Accept-Encoding"
+                     | "Accept-Language"
+                     | "Authorization"
+                     | "Expect"
+                     | "From"
+                     | "Host"
+                     | "If-Match"
+                     | "If-Modified-Since"
+                     | "If-None-Match"
+                     | "If-Range"
+                     | "If-Unmodified-Since"
+                     | "Max-Forwards"
+                     | "Proxy-Authorization"
+                     | "Range"
+                     | "Referer"
+                     | "TE"
+                     | "User-Agent"
+
+entity-header-names  = "Allow"
+                     | "Content-Encoding"
+                     | "Content-Language"
+                     | "Content-Length"
+                     | "Content-Location"
+                     | "Content-MD5"
+                     | "Content-Range"
+                     | "Content-Type"
+                     | "Expires"
+                     | "Last-Modified"
+
+;************************************************************************************************
