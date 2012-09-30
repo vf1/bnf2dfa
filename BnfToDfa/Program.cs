@@ -15,8 +15,6 @@ namespace BnfToDfa
 		{
 			try
 			{
-				//api.bnf api.mrk "API"
-
 				if (args.Length < 2 || args.Length > 4)
 				{
 					Console.WriteLine("Usage:");
