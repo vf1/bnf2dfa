@@ -64,7 +64,7 @@ namespace BnfToDfa
 
 		public MetaParser()
 		{
-			regex = new Regex("^;@(?<command>[a-z]+)\\s+\"(?<argument>.+?)\"");
+			regex = new Regex("^;@(?<command>[a-z]+)\\s+\"(?<argument>.+?)\"", RegexOptions.Multiline);
 		}
 
 		public IInformation Parse(string bnf)

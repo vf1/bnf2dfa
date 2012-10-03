@@ -21,7 +21,7 @@ namespace BnfToDfa
 		public State GetNfa(RulePath path)
 		{
 			if (rules.ContainsKey(name) == false)
-				throw new Exception(string.Format(@"@RuleLinkExpression: |{0}| rule not", name));
+				throw new Exception(string.Format(@"@RuleLinkExpression: |{0}| rule not found", name));
 
 			var newPath = path + name;
 

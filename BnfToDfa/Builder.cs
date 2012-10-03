@@ -12,11 +12,25 @@ namespace BnfToDfa
 		private readonly Dictionary<string, AlternationExpression> rules;
 		private Func<State, RulePath, State> markAction;
 
+		public Builder()
+			: this(null)
+		{
+		}
+
+		public Builder(ParseTree tree, Builder other)
+			: this(tree, other.rules)
+		{
+		}
+
 		public Builder(ParseTree tree)
+			: this(tree, new Dictionary<string, AlternationExpression>())
+		{
+		}
+
+		private Builder(ParseTree tree, Dictionary<string, AlternationExpression> rules)
 		{
 			this.tree = tree;
-
-			this.rules = new Dictionary<string, AlternationExpression>();
+			this.rules = rules;
 		}
 
 		public State CreateNfa(string rootName, Func<State, RulePath, State> markAction)

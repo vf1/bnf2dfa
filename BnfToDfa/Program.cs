@@ -74,7 +74,8 @@ namespace BnfToDfa
 			}
 			catch (Exception ex)
 			{
-				Console.Write(ex.ToString());
+				Console.WriteLine();
+				Console.WriteLine("Error {0}", ex.Message);
 				return -1;
 			}
 
@@ -83,34 +84,28 @@ namespace BnfToDfa
 
 		private static Builder LoadBnfFiles(string fileName)
 		{
-			Builder result = null;
+			var result = new Builder();
 
-			foreach (var builder in LoadBnfFile(fileName))
-			{
-				if (result == null)
-					result = builder;
-				else
-					result.AddExpressions(builder);
-			}
+			LoadBnfFile(fileName, result);
 
 			return result;
 		}
 
-		private static IEnumerable<Builder> LoadBnfFile(string fileName)
+		private static void LoadBnfFile(string fileName, Builder mainBuilder)
 		{
 			Console.WriteLine("Parse BNF file: {0}", fileName);
 
-			
+
 			var bnf = File.ReadAllText(fileName);
 
-			
+
 			var metaParser = new MetaParser();
 			var meta = metaParser.Parse(bnf);
 
 
 			var oprimizedBnf = Optimize(bnf);
 
-	
+
 			var parser = new Parser(new BnfGrammar(meta.Mode));
 			var tree = parser.Parse(oprimizedBnf, fileName);
 			if (tree.Status == ParseTreeStatus.Error)
@@ -120,16 +115,13 @@ namespace BnfToDfa
 					: string.Format(@"Unknow error in BNF file {0}", fileName));
 			}
 
-			
-			var builder = new Builder(tree);
+
+			var builder = new Builder(tree, mainBuilder);
 			builder.BuildExpressions();
 
 
-			yield return builder;
-
 			foreach (var @using in meta.Usings)
-				foreach (var child in LoadBnfFile(@using))
-					yield return child;
+				LoadBnfFile(@using, mainBuilder);
 		}
 
 		static string Optimize(string xbnf)

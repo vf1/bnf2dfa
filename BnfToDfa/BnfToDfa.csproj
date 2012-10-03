@@ -69,6 +69,7 @@
     <Compile Include="ActionsDescription.cs" />
     <Compile Include="BnfGrammar.cs" />
     <Compile Include="BnfTokenFilter.cs" />
+    <Compile Include="NumberLiteralEx.cs" />
     <Compile Include="Marker.cs" />
     <Compile Include="Expressions\AlternationExpression.cs" />
     <Compile Include="Expressions\BaseExpression.cs" />

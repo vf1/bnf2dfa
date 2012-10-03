@@ -32,12 +32,12 @@ namespace BnfToDfa
 			var bindig1 = new NumberLiteral("bindig", NumberOptions.Binary | NumberOptions.IntOnly);
 			var bindig2 = new NumberLiteral("bindig", NumberOptions.Binary | NumberOptions.IntOnly);
 			var hexdig1 = new NumberLiteral("hexdig", NumberOptions.Hex | NumberOptions.IntOnly);
-			var hexdig2 = new NumberLiteral("hexdig", NumberOptions.Hex | NumberOptions.IntOnly);
+			var hexdig2 = new NumberLiteralEx("hexdig", NumberOptions.Hex | NumberOptions.IntOnly);
 			var decdig1 = new NumberLiteral("decvalue", NumberOptions.IntOnly);
 			var decdig2 = new NumberLiteral("decvalue", NumberOptions.IntOnly);
 			var charval = new StringLiteral("charval", "\"", StringOptions.NoEscapes);
-			var repeat1 = new NumberLiteral("repeat1", NumberOptions.IntOnly);
-			var repeat2 = new NumberLiteral("repeat2", NumberOptions.IntOnly);
+			var repeat1 = new NumberLiteral("repeat1", NumberOptions.IntOnly | NumberOptions.AllowLetterAfter);
+			var repeat2 = new NumberLiteral("repeat2", NumberOptions.IntOnly | NumberOptions.AllowLetterAfter);
 			var minus = ToTerm("-", "minus");
 			var point = ToTerm(".", "point");
 
