@@ -35,7 +35,7 @@ namespace BnfToDfa
 
 					var builder = LoadBnfFiles(bnfFile);
 
-		
+
 					var rules = new HashSet<string>();
 					builder.CreateNfa(rootRule, (state, rulePath) =>
 						{
@@ -83,8 +83,10 @@ namespace BnfToDfa
 					Console.WriteLine(", max NFA state id: {0}", Fsm.State.MaxId);
 
 
+					Console.ForegroundColor = ConsoleColor.Yellow;
 					foreach (var unused in marker.GetUnusedRules())
 						Console.WriteLine("UNUSED: {0}", unused);
+					Console.ResetColor();
 
 
 					PackNfa.Pack(nfa, true);
@@ -105,8 +107,10 @@ namespace BnfToDfa
 			}
 			catch (Exception ex)
 			{
+				Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine();
 				Console.WriteLine("Error {0}", ex.Message);
+				Console.ResetColor();
 				return -1;
 			}
 

@@ -273,9 +273,14 @@ namespace DfaCompiler
 				_main.WriteLine("// NO TABLES");
 		}
 
-		private void GenerateLoadFunction3(int count, bool empty)
+		private void GenerateLoadFunction3(int count, bool empty, string @namespace)
 		{
 			_main.WriteLine("#region void LoadTables(..)");
+
+			_main.WriteLine("public static void LoadTables()");
+			_main.WriteLine("{");
+			_main.WriteLine("LoadTables(\"\");");
+			_main.WriteLine("}");
 
 			_main.WriteLine("public static void LoadTables(string path)");
 			_main.WriteLine("{");
@@ -285,7 +290,7 @@ namespace DfaCompiler
 				_main.WriteLine("const int maxItems = byte.MaxValue + 1;");
 				_main.WriteLine("const int maxBytes = sizeof(Int32) * maxItems;");
 
-				_main.WriteLine("using (var reader = new DeflateStream(File.OpenRead(path), CompressionMode.Decompress))");
+				_main.WriteLine("using (var reader = new DeflateStream(File.OpenRead(path+\"\\\\{0}.dfa\"), CompressionMode.Decompress))", @namespace);
 				_main.WriteLine("{");
 				_main.WriteLine("byte[] buffer = new byte[maxBytes];");
 

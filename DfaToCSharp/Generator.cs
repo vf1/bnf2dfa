@@ -299,7 +299,7 @@ namespace DfaCompiler
 
 				GenerateStateConsts(countStates + 1);
 				GenerateTables(dfa, countStates);
-				GenerateLoadFunction3(countStates, dfa == null);
+				GenerateLoadFunction3(countStates, dfa == null, namespace1);
 				GenerateParseMethod(dfa, countStates);
 				GenerateGetHexDigitFunction();
 
