@@ -19,9 +19,9 @@ namespace BnfToDfa
 			expressions.Add(expression);
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
-			return State.NoCloneAlternation(Builder.BaseExpression.GetNfasArray(path, expressions));
+			return State.NoCloneAlternation(Builder.BaseExpression.GetNfasArray(path, expressions, param));
 		}
 	}
 }

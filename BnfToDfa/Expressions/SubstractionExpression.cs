@@ -16,9 +16,9 @@ namespace BnfToDfa
 			this.value2 = value2;
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
-			return State.Substract(value1.GetNfa(path), value2.GetNfa(path));
+			return State.Substract(value1.GetNfa(path, param), value2.GetNfa(path, param));
 		}
 	}
 }

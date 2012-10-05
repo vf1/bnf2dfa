@@ -10,7 +10,6 @@ namespace BnfToDfa
 	{
 		private readonly ParseTree tree;
 		private readonly Dictionary<string, AlternationExpression> rules;
-		private Func<State, RulePath, State> markAction;
 
 		public Builder()
 			: this(null)
@@ -37,19 +36,10 @@ namespace BnfToDfa
 		{
 			State nfa;
 
-			try
-			{
-				this.markAction = markAction;
+			if (rules.ContainsKey(rootName) == false)
+				throw new BuilderException(@"@Builder: root rule not found");
 
-				if (rules.ContainsKey(rootName) == false)
-					throw new BuilderException(@"@Builder: root rule not found");
-
-				nfa = rules[rootName].GetNfa(new RulePath(rootName));
-			}
-			finally
-			{
-				this.markAction = null;
-			}
+			nfa = rules[rootName].GetNfa(new RulePath(rootName), new GetNfaParams(markAction));
 
 			nfa.MarkFinal();
 
@@ -64,13 +54,6 @@ namespace BnfToDfa
 					throw new BuilderException(string.Format(@"Rule |{0}| exist in two different files", pair.Key));
 				rules.Add(pair.Key, pair.Value);
 			}
-		}
-
-		protected State OnMarkRule(State start, RulePath path)
-		{
-			if (markAction != null)
-				return markAction(start, path);
-			return start;
 		}
 
 		public void BuildExpressions()

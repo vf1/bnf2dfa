@@ -21,56 +21,87 @@ namespace BnfToDfa
 					Console.WriteLine("  BnfToDfa.exe bnf_file.bnf mark_file.mrk root_rule_name [no_warning_file.nwr]");
 					Console.WriteLine("-or-");
 					Console.WriteLine("  BnfToDfa.exe bnf_file.bnf root_rule_name");
+					Console.WriteLine("-or-");
+					Console.WriteLine("  BnfToDfa.exe --all-marks bnf_file.bnf root_rule_name output_file_name");
 					return -1;
 				}
 
-				var bnfFile = args[0];
-				var mrkFile = (args.Length >= 3) ? args[1] : null;
-				var rootRule = (args.Length >= 3) ? args[2] : args[1];
-				var nwrFile = (args.Length >= 4) ? args[3] : null;
-				var dfaFile = Path.GetFileNameWithoutExtension(bnfFile) + ".xml";
-
-
-				var builder = LoadBnfFiles(bnfFile);
-
-
-				var marker = new Marker();
-				if (mrkFile != null)
+				if (args[0] == "--all-marks")
 				{
-					Console.WriteLine("Load marks file: {0}", mrkFile);
-					marker.LoadMarks(mrkFile);
-				}
+					var bnfFile = args[1];
+					var rootRule = args[2];
+					var outputFile = args[3];
 
-				if (nwrFile != null)
+
+					var builder = LoadBnfFiles(bnfFile);
+
+		
+					var rules = new HashSet<string>();
+					builder.CreateNfa(rootRule, (state, rulePath) =>
+						{
+							rules.Add(rulePath.Value);
+							return state;
+						});
+
+
+					Console.WriteLine("Write all ({1}) marks: {0}", outputFile, rules.Count);
+
+					using (var output = File.CreateText(outputFile))
+					{
+						foreach (var rule in rules)
+							output.WriteLine(rule);
+					}
+				}
+				else
 				{
-					Console.WriteLine("Load 'No warning' file: {0}", nwrFile);
-					marker.LoadSuppressWarning(nwrFile);
+					var bnfFile = args[0];
+					var mrkFile = (args.Length >= 3) ? args[1] : null;
+					var rootRule = (args.Length >= 3) ? args[2] : args[1];
+					var nwrFile = (args.Length >= 4) ? args[3] : null;
+					var dfaFile = Path.GetFileNameWithoutExtension(bnfFile) + ".xml";
+
+
+					var builder = LoadBnfFiles(bnfFile);
+
+
+					var marker = new Marker();
+					if (mrkFile != null)
+					{
+						Console.WriteLine("Load marks file: {0}", mrkFile);
+						marker.LoadMarks(mrkFile);
+					}
+
+					if (nwrFile != null)
+					{
+						Console.WriteLine("Load 'No warning' file: {0}", nwrFile);
+						marker.LoadSuppressWarning(nwrFile);
+					}
+
+
+					Console.Write("Build NFA");
+					var nfa = builder.CreateNfa(rootRule, marker.MarkRuleHandler);
+					Console.WriteLine(", max NFA state id: {0}", Fsm.State.MaxId);
+
+
+					foreach (var unused in marker.GetUnusedRules())
+						Console.WriteLine("UNUSED: {0}", unused);
+
+
+					PackNfa.Pack(nfa, true);
+
+
+					int count;
+					var dfa = nfa.ToDfa3(out count, true);
+					Console.WriteLine("DFA Complied States: {0}", count);
+
+
+					var minCount = dfa.Minimize(true);
+					Console.WriteLine("Minimized DFA States: {0}", minCount);
+
+
+					Console.WriteLine("Write DFA file: {0}", dfaFile);
+					Writer.Write(dfa, dfaFile);
 				}
-
-
-				Console.Write("Build NFA");
-				var nfa = builder.CreateNfa(rootRule, marker.MarkRuleHandler);
-				Console.WriteLine(", max NFA state id: {0}", Fsm.State.MaxId);
-
-
-				foreach (var unused in marker.GetUnusedRules())
-					Console.WriteLine("UNUSED: {0}", unused);
-
-
-				PackNfa.Pack(nfa, true);
-
-
-				int count;
-				var dfa = nfa.ToDfa3(out count, true);
-				Console.WriteLine("DFA Complied States: {0}", count);
-
-
-				var minCount = dfa.Minimize(true);
-				Console.WriteLine("Minimized DFA States: {0}", minCount);
-
-
-				Console.WriteLine("Write DFA file: {0}", dfaFile);
-				Writer.Write(dfa, dfaFile);
 			}
 			catch (Exception ex)
 			{

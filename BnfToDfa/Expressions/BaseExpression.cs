@@ -8,27 +8,15 @@ namespace BnfToDfa
 	{
 		public class BaseExpression
 		{
-			private readonly Builder builder;
-
-			public BaseExpression(Builder builder)
-			{
-				this.builder = builder;
-			}
-
-			public static IEnumerable<State> GetNfas(RulePath path, IEnumerable<IExpression> expressions)
+			public static IEnumerable<State> GetNfas(RulePath path, IEnumerable<IExpression> expressions, GetNfaParams param)
 			{
 				foreach (var expression in expressions)
-					yield return expression.GetNfa(path);
+					yield return expression.GetNfa(path, param);
 			}
 
-			public static State[] GetNfasArray(RulePath path, IEnumerable<IExpression> expressions)
+			public static State[] GetNfasArray(RulePath path, IEnumerable<IExpression> expressions, GetNfaParams param)
 			{
-				return new List<State>(GetNfas(path, expressions)).ToArray();
-			}
-
-			protected State OnMarkRule(State start, RulePath path)
-			{
-				return builder.OnMarkRule(start, path);
+				return new List<State>(GetNfas(path, expressions, param)).ToArray();
 			}
 		}
 	}

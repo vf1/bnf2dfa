@@ -11,14 +11,13 @@ namespace BnfToDfa
 		private readonly string chars;
 
 		public CharvalExpression(Builder builder, string chars)
-			: base(builder)
 		{
 			this.chars = chars;
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
-			return OnMarkRule(Thompson.Create(chars), path + chars);
+			return param.OnMarkRule(Thompson.Create(chars), path + chars);
 		}
 	}
 }

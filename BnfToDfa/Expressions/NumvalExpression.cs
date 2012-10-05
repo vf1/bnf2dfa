@@ -32,7 +32,7 @@ namespace BnfToDfa
 			hexs.Add(hex);
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
 			if (hex1 != null)
 			{

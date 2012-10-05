@@ -12,20 +12,19 @@ namespace BnfToDfa
 		private readonly Dictionary<string, AlternationExpression> rules;
 
 		public RuleLinkExpression(Builder builder, string name, Dictionary<string, AlternationExpression> rules)
-			: base(builder)
 		{
 			this.name = name;
 			this.rules = rules;
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
 			if (rules.ContainsKey(name) == false)
 				throw new Exception(string.Format(@"@RuleLinkExpression: |{0}| rule not found", name));
 
 			var newPath = path + name;
 
-			return OnMarkRule(rules[name].GetNfa(newPath), newPath);
+			return param.OnMarkRule(rules[name].GetNfa(newPath, param), newPath);
 		}
 	}
 }

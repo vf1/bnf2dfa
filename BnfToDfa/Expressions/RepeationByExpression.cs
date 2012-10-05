@@ -20,9 +20,9 @@ namespace BnfToDfa
 			this.by = by;
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
-			var result = State.NoCloneRepeatBy(value.GetNfa(path), by.GetNfa(path));
+			var result = State.NoCloneRepeatBy(value.GetNfa(path, param), by.GetNfa(path, param));
 
 			if (count1 <= 0)
 				result = State.NoCloneOption(result);

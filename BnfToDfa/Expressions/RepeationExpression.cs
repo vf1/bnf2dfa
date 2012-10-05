@@ -18,9 +18,9 @@ namespace BnfToDfa
 			this.value = value;
 		}
 
-		public State GetNfa(RulePath path)
+		public State GetNfa(RulePath path, GetNfaParams param)
 		{
-			return State.Repeat(count1, count2, value.GetNfa(path));
+			return State.Repeat(count1, count2, value.GetNfa(path, param));
 		}
 	}
 }
