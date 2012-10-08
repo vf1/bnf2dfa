@@ -18,12 +18,18 @@ namespace DfaCompiler
 
 			_main.WriteLine("public bool ParseAll(ArraySegment<byte> data)");
 			_main.WriteLine("{");
-			_main.WriteLine("return ParseAll(data.Array, data.Offset, data.Count);");
+			_main.WriteLine("int parsed;");
+			_main.WriteLine("return ParseAll(data.Array, data.Offset, data.Count, out parsed);");
 			_main.WriteLine("}");
 
-			_main.WriteLine("public bool ParseAll(byte[] bytes, int offset, int length)");
+			_main.WriteLine("public bool ParseAll(ArraySegment<byte> data, out int parsed)");
 			_main.WriteLine("{");
-			_main.WriteLine("int parsed = 0;");
+			_main.WriteLine("return ParseAll(data.Array, data.Offset, data.Count, out parsed);");
+			_main.WriteLine("}");
+
+			_main.WriteLine("public bool ParseAll(byte[] bytes, int offset, int length, out int parsed)");
+			_main.WriteLine("{");
+			_main.WriteLine("parsed = 0;");
 			_main.WriteLine("do");
 			_main.WriteLine("{");
 			_main.WriteLine("Final = false;");
