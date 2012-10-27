@@ -57,8 +57,7 @@ namespace BnfToDfa
 
 						if (arrow < 0)
 						{
-							Console.WriteLine("Error: Failed to parse group {0}", mark);
-							throw new Exception();
+							throw new Exception(string.Format("Error: Failed to parse group {0}", mark));
 						}
 
 						int point = mark.IndexOf(".", 1, arrow);
@@ -175,7 +174,10 @@ namespace BnfToDfa
 			ActionsDescription.Action[] extraActions = null;
 			if (marks.ContainsKey(markpath))
 			{
+				Console.ForegroundColor = ConsoleColor.Yellow;
 				Console.WriteLine("Warning: Duplicated mark {0}", markpath);
+				Console.ResetColor();
+
 				extraActions = marks[markpath].Actions;
 				marks.Remove(markpath);
 			}
@@ -200,8 +202,7 @@ namespace BnfToDfa
 					}
 					catch (KeyNotFoundException)
 					{
-						Console.WriteLine("Group not defined {0}", xmark.Actions[0].Args[0]);
-						throw new Exception();
+						throw new Exception(string.Format("Group not defined {0}", xmark.Actions[0].Args[0]));
 					}
 				}
 			}

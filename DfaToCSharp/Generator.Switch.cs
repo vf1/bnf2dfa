@@ -279,13 +279,13 @@ namespace DfaCompiler
 				_main.WriteLine("// NO TABLES");
 		}
 
-		private void GenerateLoadFunction3(int count, bool empty, string @namespace)
+		private void GenerateLoadFunction3(int count, bool empty, string @namespace, string classname)
 		{
 			_main.WriteLine("#region void LoadTables(..)");
 
 			_main.WriteLine("public static void LoadTables()");
 			_main.WriteLine("{");
-			_main.WriteLine("LoadTables(\"\");");
+			_main.WriteLine("LoadTables(null);");
 			_main.WriteLine("}");
 
 			_main.WriteLine("public static void LoadTables(string path)");
@@ -295,6 +295,8 @@ namespace DfaCompiler
 			{
 				_main.WriteLine("const int maxItems = byte.MaxValue + 1;");
 				_main.WriteLine("const int maxBytes = sizeof(Int32) * maxItems;");
+
+				_main.WriteLine("if(path==null) path=Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);");
 
 				_main.WriteLine("using (var reader = new DeflateStream(File.OpenRead(path+\"\\\\{0}.dfa\"), CompressionMode.Decompress))", @namespace);
 				_main.WriteLine("{");
@@ -311,6 +313,32 @@ namespace DfaCompiler
 			}
 
 			_main.WriteLine("}");
+
+			_main.WriteLine("public static void InitializeAsync(Action<int> callback)");
+			_main.WriteLine("{");
+			_main.WriteLine("{0}.InitializeAsync(null, callback);", classname);
+			_main.WriteLine("}");
+
+			_main.WriteLine("public static void InitializeAsync(string path, Action<int> callback)");
+			_main.WriteLine("{");
+			_main.WriteLine("System.Threading.ThreadPool.QueueUserWorkItem((stateInfo) =>");
+			_main.WriteLine("{");
+			_main.WriteLine("{0}.LoadTables();", classname);
+			_main.WriteLine("int time = {0}.CompileParseMethod();", classname);
+			_main.WriteLine("if (callback != null)");
+			_main.WriteLine("callback(time);");
+			_main.WriteLine("});");
+			_main.WriteLine("}");
+
+			_main.WriteLine("public static int CompileParseMethod()");
+			_main.WriteLine("{");
+			_main.WriteLine("int start = Environment.TickCount;");
+			_main.WriteLine("var reader = new {0}();", classname);
+			_main.WriteLine("reader.SetDefaultValue();");
+			_main.WriteLine("reader.Parse(new byte[] { 0 }, 0, 1);");
+			_main.WriteLine("return Environment.TickCount - start;");
+			_main.WriteLine("}");
+
 
 			_main.WriteLine("#endregion");
 		}
